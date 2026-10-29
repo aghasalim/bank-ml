@@ -1,0 +1,36 @@
+best params: {'n_estimators': 188, 'learning_rate': 0.02684026549963137, 'num_leaves': 7, 'min_child_samples': 100, 'reg_lambda': 0.42611740930372816}
+time-CV ROC tuned=0.567
+test ROC default=0.682 (np.float64(0.67), np.float64(0.694))  tuned=0.705 (np.float64(0.693), np.float64(0.715))
+calibration slice prevalence=0.137, test prevalence=0.316
+uncalibrated  brier=0.283 ece=0.267 mean_pred=0.049
+sigmoid       brier=0.244 ece=0.186 mean_pred=0.130
+isotonic      brier=0.243 ece=0.185 mean_pred=0.131
+
+Worst 6 / best 3 segments by ROC-AUC (n>=150):
+| segment          |    n |   prevalence |   mean_pred |   roc_auc |
+|:-----------------|-----:|-------------:|------------:|----------:|
+| poutcome=success | 1301 |        0.695 |       0.271 |     0.545 |
+| poutcome=failure | 2224 |        0.214 |       0.079 |     0.599 |
+| poutcome=other   |  909 |        0.271 |       0.092 |     0.627 |
+| age_band=60+     | 1094 |        0.435 |       0.204 |     0.632 |
+| poutcome=unknown | 4609 |        0.267 |       0.098 |     0.638 |
+| job=retired      |  897 |        0.419 |       0.196 |     0.644 |
+| segment           |   n |   prevalence |   mean_pred |   roc_auc |
+|:------------------|----:|-------------:|------------:|----------:|
+| contact=unknown   | 255 |        0.129 |       0.08  |     0.732 |
+| contact=telephone | 899 |        0.263 |       0.12  |     0.749 |
+| job=self-employed | 274 |        0.321 |       0.127 |     0.782 |
+
+Top 10 mean|SHAP|:
+|                  |      0 |
+|:-----------------|-------:|
+| poutcome_success | 0.1784 |
+| age              | 0.1444 |
+| balance          | 0.1289 |
+| contact_unknown  | 0.1181 |
+| marital_married  | 0.113  |
+| day              | 0.0931 |
+| pdays            | 0.0914 |
+| month_apr        | 0.077  |
+| month_feb        | 0.065  |
+| month_mar        | 0.0635 |
