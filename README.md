@@ -6,6 +6,10 @@
 1. **Target leakage.** `duration` (call length) is only known after the call outcome. It is excluded from the main models, and kept in one ablation to show how much it inflates scores.
 2. **Time drift.** Rows are in chronological order (UCI documentation), and the positive rate moves from about 3% in the earliest eighth of the rows to about 45% in the last eighth. Train (first 80%) has 6.7% positives; the chronological test set (last 20%) has **31.6%**. A random split hides this.
 
+![Positive rate by row block](results/drift.png)
+
+Share of positives in 20 equal blocks of rows, in chronological order; the dashed line is the train/test cut.
+
 ## Setup
 Split: first 80% of rows = train, last 20% = test (n_train=36,168, n_test=9,043). All preprocessing (one-hot with rare-category grouping, scaling for logistic regression) is inside an sklearn `Pipeline`, so no fold sees another fold's statistics. Tuning touched only the train portion. The test set was evaluated once per model.
 Metric choice: because prevalence differs between folds and test, PR-AUC is not comparable across them (a no-skill model scores 0.316 on test). ROC-AUC is prevalence-insensitive, so it is the headline; PR-AUC is reported as lift over prevalence.
@@ -28,6 +32,10 @@ Reading it:
 - **Model choice barely matters.** Without `duration`, all four models land at 0.68–0.70 test ROC-AUC with overlapping CIs. Gradient boosting wins random CV by about 0.03 over logistic regression, but that edge does not carry over to the later period.
 - **Time-CV on train is low and noisy** (about 0.55 ± 0.03–0.06) because the first expanding-window folds train on a few thousand rows from a 3% prevalence period.
 
+![Random-CV vs chronological test ROC-AUC](results/baselines.png)
+
+Random 5-fold CV on train vs the chronological test, per model, without and with `duration` (from `results/baselines.csv`).
+
 ## Tuning (LightGBM, no duration, 25 Optuna trials, expanding-window CV on train only)
 ```
 best params: {'n_estimators': 188, 'learning_rate': 0.02684026549963137, 'num_leaves': 7, 'min_child_samples': 100, 'reg_lambda': 0.42611740930372816}
@@ -45,6 +53,10 @@ isotonic      brier=0.243 ece=0.185 mean_pred=0.131
 
 ```
 Calibration helps (ECE 0.267 -> about 0.185) but the model stays badly calibrated: it was trained at 6.7% positives and the test period has 31.6%. This is prior shift, and recalibrating on the most recent training slice (13.7% positives) cannot fix a shift that large. Plot: `results/calibration.png`. In production this model would need recalibration on fresh labels.
+
+![Reliability diagram on the chronological test](results/calibration.png)
+
+Reliability on the test set: all three versions sit well above the diagonal, i.e. the model underpredicts.
 
 ## Error analysis by segment (tuned model, test, n >= 150; `results/segments.csv`)
 | segment          |    n |   prevalence |   mean_pred |   roc_auc |
@@ -79,11 +91,16 @@ The model is weakest for clients with a previous successful campaign (`poutcome=
 
 `day` and `month_*` features rank high. They are partly proxies for *when* a campaign ran, so they encode the drift, not client behaviour. I did not remove them; treat their importance with caution.
 
+![SHAP summary](results/shap_summary.png)
+
+SHAP values per feature for the tuned LightGBM on 2000 test rows; colour is the feature value.
+
 ## Run it
 ```bash
 make setup data test
 make baselines   # a few minutes
 make final       # tuning + calibration + segments + SHAP
+python scripts/make_figures.py   # drift.png and baselines.png (needs data/ and results/baselines.csv)
 ```
 `docker build -t bank-ml .` runs the tests (**Docker build not tested**).
 
