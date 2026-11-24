@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.jpg" alt="Line drawing of table rows above a timeline, cut by one vertical line that separates past from future" width="100%"></p>
+
 # bank-ml: leakage-aware classification on UCI Bank Marketing
 
 **Problem.** Predict whether a bank client subscribes to a term deposit after a marketing call (45,211 rows, 11.7% positive; UCI Bank Marketing `bank-full.csv`, CC BY 4.0).
@@ -9,6 +11,20 @@
 ![Positive rate by row block](results/drift.png)
 
 Share of positives in 20 equal blocks of rows, in chronological order; the dashed line is the train/test cut.
+
+<details>
+<summary>Contents</summary>
+
+- [Setup](#setup)
+- [Results (all rows run; defaults except where noted)](#results-all-rows-run-defaults-except-where-noted)
+- [Tuning (LightGBM, no duration, 25 Optuna trials, expanding-window CV on train only)](#tuning-lightgbm-no-duration-25-optuna-trials-expanding-window-cv-on-train-only)
+- [Calibration (fit on first 80% of train, calibrate on the most recent 20% of train, evaluate on test)](#calibration-fit-on-first-80-of-train-calibrate-on-the-most-recent-20-of-train-evaluate-on-test)
+- [Error analysis by segment (tuned model, test, n >= 150; results/segments.csv)](#error-analysis-by-segment-tuned-model-test-n--150-resultssegmentscsv)
+- [SHAP (tuned model, 2000 test rows; results/shap_summary.png)](#shap-tuned-model-2000-test-rows-resultsshap_summarypng)
+- [Run it](#run-it)
+- [Limitations](#limitations)
+
+</details>
 
 ## Setup
 Split: first 80% of rows = train, last 20% = test (n_train=36,168, n_test=9,043). All preprocessing (one-hot with rare-category grouping, scaling for logistic regression) is inside an sklearn `Pipeline`, so no fold sees another fold's statistics. Tuning touched only the train portion. The test set was evaluated once per model.
