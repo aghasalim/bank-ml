@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/banner.jpg" alt="Line drawing of table rows above a timeline, cut by one vertical line that separates past from future" width="100%"></p>
-
 # bank-ml: leakage-aware classification on UCI Bank Marketing
 
 **Problem.** Predict whether a bank client subscribes to a term deposit after a marketing call (45,211 rows, 11.7% positive; UCI Bank Marketing `bank-full.csv`, CC BY 4.0).
